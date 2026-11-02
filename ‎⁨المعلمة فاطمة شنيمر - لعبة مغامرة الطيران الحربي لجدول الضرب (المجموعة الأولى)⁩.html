@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة مغامرة الطيران الحربي لجدول الضرب - أ. فاطمة شنيمر</title>
+    <style>
+        :root {
+            --primary: #ef4444;
+            --accent: #f59e0b;
+            --danger: #dc2626;
+            --success: #10b981;
+            --bg-dark: #090d16;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        header {
+            background: #0f172a;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #ef4444;
+        }
+
+        .title-area h1 {
+            margin: 0;
+            font-size: 1rem;
+            color: #f87171;
+        }
+
+        .title-area p {
+            margin: 0;
+            font-size: 0.75rem;
+            color: #fca5a5;
+        }
+
+        .student-badge {
+            background: #1e293b;
+            border: 1px solid #f87171;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: #f0f9ff;
+            cursor: pointer;
+        }
+
+        /* Fast Table Bar */
+        .table-selector-bar {
+            background: #0f172a;
+            display: flex;
+            gap: 6px;
+            padding: 6px;
+            overflow-x: auto;
+            border-bottom: 1px solid #ef4444;
+            width: 100%;
+        }
+
+        .table-btn {
+            background: #1e293b;
+            color: #e2e8f0;
+            border: 1px solid #991b1b;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .table-btn.active {
+            background: #ef4444;
+            color: white;
+            border-color: #f87171;
+        }
+
+        /* Canvas & Fast Animations */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px;
+        }
+
+        .game-canvas-container {
+            width: 100%;
+            max-width: 700px;
+            background: linear-gradient(180deg, #1e3a8a 0%, #0f172a 100%);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #ef4444;
+            height: 200px;
+        }
+
+        .fighter-jet {
+            position: absolute;
+            font-size: 2rem;
+            transition: all 0.4s ease-out;
+            z-index: 50;
+            transform: translate(50%, -50%);
+        }
+
+        .cloud-station {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 3px 8px;
+            color: #0f172a;
+            font-weight: bold;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            border: 2px solid #94a3b8;
+            transform: translate(50%, -50%);
+            white-space: nowrap;
+        }
+
+        .cloud-station.active {
+            background: #ffffff;
+            border-color: #ef4444;
+            transform: translate(50%, -50%) scale(1.15);
+            color: #991b1b;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 700px;
+            background: #0f172a;
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 8px;
+            border: 1px solid #ef4444;
+            text-align: center;
+        }
+
+        .visual-display {
+            background: #030712;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 8px 0;
+            min-height: 110px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px dashed #ef4444;
+        }
+
+        .method-input {
+            width: 75px;
+            height: 40px;
+            font-size: 1.3rem;
+            text-align: center;
+            border-radius: 8px;
+            border: 2px solid #f87171;
+            background: #030712;
+            color: #f59e0b;
+            font-weight: bold;
+            outline: none;
+        }
+
+        .btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* Fast Numpad */
+        .numpad-modal {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: #0f172a;
+            border-top: 3px solid #ef4444;
+            padding: 10px;
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .numpad-modal.show { display: flex; }
+
+        .numpad-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            width: 100%;
+            max-width: 380px;
+        }
+
+        .num-btn {
+            background: #1e293b;
+            color: #f8fafc;
+            border: 1px solid #334155;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        /* Modals & Certificate */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            padding: 10px;
+        }
+
+        .modal-body {
+            background: #0f172a;
+            padding: 18px;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 100%;
+            border: 2px solid #ef4444;
+            text-align: center;
+        }
+
+        .modal-body input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #334155;
+            background: #030712;
+            color: white;
+            margin: 8px 0;
+            text-align: center;
+        }
+
+        .hidden { display: none !important; }
+
+        /* Number Line & Kangaroo */
+        .number-line-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .number-line-axis {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            width: 100%;
+            border-bottom: 3px solid #f59e0b;
+            padding-bottom: 3px;
+            position: relative;
+            margin-top: 30px;
+        }
+
+        .line-tick {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .tick-mark {
+            width: 2px;
+            height: 10px;
+            background: #f59e0b;
+        }
+
+        .tick-val {
+            font-size: 0.75rem;
+            color: #38bdf8;
+            font-weight: bold;
+        }
+
+        .kangaroo-character {
+            position: absolute;
+            font-size: 1.6rem;
+            top: -38px;
+            transform: translateX(50%);
+            z-index: 10;
+        }
+
+        /* Jump Arcs Canvas Overlay with Arrow Heads */
+        .arcs-svg {
+            position: absolute;
+            top: -30px;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            pointer-events: none;
+            overflow: visible;
+        }
+
+        .grid-visual {
+            display: inline-grid;
+            gap: 2px;
+            background: #0f172a;
+            padding: 6px;
+            border-radius: 6px;
+            border: 1px solid #38bdf8;
+        }
+
+        .grid-cell {
+            width: 18px;
+            height: 18px;
+            background: #38bdf8;
+            border-radius: 3px;
+        }
+
+        .dot-group {
+            display: inline-flex;
+            gap: 3px;
+            padding: 4px;
+            border: 1px dashed #f59e0b;
+            border-radius: 6px;
+            margin: 2px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            background: #f59e0b;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="title-area">
+            <h1>🛩️ الطيران الحربي - الضرب (المجموعة الأولى)</h1>
+            <p>إشراف المعلمة: <strong>فاطمة شنيمر</strong></p>
+        </div>
+        <div class="student-badge" id="studentBadge" onclick="openNameModal()">
+            👨‍✈️ <span id="studentNameText">الكابتن</span>
+        </div>
+    </header>
+
+    <div class="table-selector-bar" id="tableSelectorBar"></div>
+
+    <main>
+        <div class="game-canvas-container" id="gameCanvasContainer">
+            <div id="skyCanvas" style="width:100%; height:100%; position:relative;">
+                <div class="fighter-jet" id="fighterJet">🚀</div>
+                <div id="cloudStationsContainer"></div>
+            </div>
+        </div>
+
+        <div class="card" id="questionCard">
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                <span style="color:#f87171; font-weight:bold; font-size:0.9rem;" id="methodTitle">الطريقة الأولى</span>
+                <span style="color:#f59e0b; font-weight:bold; font-size:0.9rem;" id="scoreText">النقاط: ٠</span>
+            </div>
+
+            <p style="margin:2px 0; color:#cbd5e1; font-size:0.85rem;" id="methodDesc">اكتب ناتج المسألة:</p>
+
+            <div class="visual-display" id="visualDisplay"></div>
+
+            <div style="display:flex; justify-content:center; align-items:center; gap:8px; margin-top:8px;">
+                <span style="font-size:1.2rem; font-weight:bold; color:#f87171;" id="equationText">الضرب = </span>
+                <input type="text" id="answerInput" class="method-input" readonly placeholder="؟" onclick="openNumpad()">
+                <button class="btn" onclick="checkAnswer()">تحقق ⚡</button>
+            </div>
+
+            <div id="feedback" style="margin-top:6px; font-weight:bold; min-height:20px; font-size:0.9rem;"></div>
+        </div>
+
+        <div id="victoryCard" class="card hidden" style="background:#1e293b;">
+            <div style="font-size:2.5rem;">🛩️ 🎖️ 🏆</div>
+            <h2 style="color:#f59e0b; margin:4px 0; font-size:1.2rem;">انتصار ساحق واختراق لحاجز الصوت!</h2>
+            <p style="font-size:0.85rem;">اجتزت جميع المحطات بنجاحٍ باهرٍ ومبهر!</p>
+            <button class="btn" style="margin-top:10px; background:#f59e0b; color:#0f172a;" onclick="openCertModal()">استلام الوسام 📜</button>
+        </div>
+    </main>
+
+    <!-- Numpad -->
+    <div id="numpadModal" class="numpad-modal">
+        <div style="display:flex; justify-content:space-between; width:100%; max-width:380px; margin-bottom:6px;">
+            <span style="color:#94a3b8; font-size:0.8rem;">لوحة المفاتيح</span>
+            <span style="color:#ef4444; font-size:0.8rem; cursor:pointer;" onclick="closeNumpad()">إغلاق ✖</span>
+        </div>
+        <div class="numpad-grid">
+            <button class="num-btn" onclick="appendNum('١')">١</button>
+            <button class="num-btn" onclick="appendNum('٢')">٢</button>
+            <button class="num-btn" onclick="appendNum('٣')">٣</button>
+            <button class="num-btn" onclick="appendNum('٤')">٤</button>
+            <button class="num-btn" onclick="appendNum('٥')">٥</button>
+            <button class="num-btn" onclick="appendNum('٦')">٦</button>
+            <button class="num-btn" onclick="appendNum('٧')">٧</button>
+            <button class="num-btn" onclick="appendNum('٨')">٨</button>
+            <button class="num-btn" onclick="appendNum('٩')">٩</button>
+            <button class="num-btn" onclick="appendNum('٠')">٠</button>
+        </div>
+        <div style="display:flex; gap:8px; width:100%; max-width:380px; margin-top:6px;">
+            <button class="num-btn" style="background:#dc2626; flex:1;" onclick="clearNum()">مسح</button>
+            <button class="num-btn" style="background:#10b981; flex:2;" onclick="closeNumpad()">تم 👍</button>
+        </div>
+    </div>
+
+    <!-- Name Modal -->
+    <div id="nameModal" class="modal-overlay">
+        <div class="modal-body">
+            <h3 style="color:#f87171; margin-top:0; font-size:1.1rem;">🛩️ مرحباً بك في المعركة الجوية!</h3>
+            <input type="text" id="nameInput" placeholder="اسم البطل / البطلة...">
+            <div style="display:flex; gap:10px; justify-content:center; margin:8px 0; font-size:0.85rem;">
+                <label><input type="radio" name="genderRole" value="بطل" checked onchange="updateGenderRole('بطل')"> 👨‍✈️ بطل</label>
+                <label><input type="radio" name="genderRole" value="بطلة" onchange="updateGenderRole('بطلة')"> 👩‍✈️ بطلة</label>
+            </div>
+            <button class="btn" onclick="saveName()">الانطلاق ⚡</button>
+        </div>
+    </div>
+
+    <!-- Cert Modal -->
+    <div id="certModal" class="modal-overlay hidden">
+        <div class="modal-body" style="background:#fff; color:#0f172a; border:4px double #dc2626;">
+            <h3 style="color:#dc2626; margin:0;">🎖️ شهادة وسام الصقور 📜</h3>
+            <p style="font-size:0.8rem; margin:4px 0;">تمنح المعلمة فاطمة شنيمر هذا الوسام لـ:</p>
+            <h2 id="certStudentName" style="color:#d97706; margin:6px 0;">الطالب/ة</h2>
+            <p style="font-size:0.75rem;">لإتقان طرق المجموعة الأولى في الضرب بنجاح واقتدار!</p>
+            <button class="btn" style="background:#475569; margin-top:8px;" onclick="closeCertModal()">إغلاق</button>
+        </div>
+    </div>
+
+    <script>
+        let studentName = "البطل/ة";
+        let selectedGender = "بطل";
+        let currentTable = 2;
+        let currentStation = 0;
+        let score = 0;
+        let stations = [];
+
+        const arabicNums = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+
+        function toArabic(n) { return n.toString().replace(/\d/g, d => arabicNums[d]); }
+        function toEnglish(str) { return str.replace(/[٠-٩]/g, d => arabicNums.indexOf(d)); }
+
+        function openNumpad() { document.getElementById('numpadModal').classList.add('show'); }
+        function closeNumpad() { document.getElementById('numpadModal').classList.remove('show'); }
+        function appendNum(num) { const inp = document.getElementById('answerInput'); if (inp) inp.value += num; }
+        function clearNum() { const inp = document.getElementById('answerInput'); if (inp) inp.value = ''; }
+
+        function setupStations() {
+            stations = [];
+            const methods = [
+                { type: 'models', title: 'الطريقة الأولى: النماذج وقطع العد' },
+                { type: 'repeated', title: 'الطريقة الثانية: الجمع المتكرر' },
+                { type: 'grid', title: 'الطريقة الثالثة: استعمال الشبكات' },
+                { type: 'skip', title: 'الطريقة الرابعة: العد القفزي' }
+            ];
+
+            let mults = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+            mults.sort(() => Math.random() - 0.5);
+
+            for (let i = 0; i < 10; i++) {
+                stations.push({
+                    type: methods[i % 4].type,
+                    title: `${methods[i % 4].title} (${toArabic(i + 1)} من ١٠)`,
+                    f1: currentTable,
+                    f2: mults[i]
+                });
+            }
+            renderCloudsUI();
+        }
+
+        function renderCloudsUI() {
+            const container = document.getElementById('cloudStationsContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const coords = [
+                { x: 90, y: 70 }, { x: 72, y: 25 }, { x: 54, y: 70 },
+                { x: 36, y: 25 }, { x: 18, y: 70 }, { x: 20, y: 45 },
+                { x: 38, y: 45 }, { x: 56, y: 45 }, { x: 74, y: 45 }, { x: 88, y: 45 }
+            ];
+
+            for (let i = 0; i < stations.length; i++) {
+                const cloud = document.createElement('div');
+                cloud.className = `cloud-station ${i === currentStation ? 'active' : ''}`;
+                cloud.id = `cloudStation_${i}`;
+                const pos = coords[i % coords.length];
+                cloud.style.right = `${pos.x}%`;
+                cloud.style.top = `${pos.y}%`;
+                cloud.innerText = `☁️ ${toArabic(i + 1)}`;
+                container.appendChild(cloud);
+            }
+        }
+
+        function moveJet(idx) {
+            const jet = document.getElementById('fighterJet');
+            if (!jet) return;
+            const coords = [
+                { x: 90, y: 70 }, { x: 72, y: 25 }, { x: 54, y: 70 },
+                { x: 36, y: 25 }, { x: 18, y: 70 }, { x: 20, y: 45 },
+                { x: 38, y: 45 }, { x: 56, y: 45 }, { x: 74, y: 45 }, { x: 88, y: 45 }
+            ];
+            const pos = coords[idx % coords.length];
+            jet.style.right = `${pos.x}%`;
+            jet.style.top = `${pos.y}%`;
+        }
+
+        function loadStation() {
+            if (currentStation >= stations.length) {
+                document.getElementById('questionCard').classList.add('hidden');
+                document.getElementById('victoryCard').classList.remove('hidden');
+                moveJet(stations.length - 1);
+                return;
+            }
+
+            for (let i = 0; i < stations.length; i++) {
+                const c = document.getElementById(`cloudStation_${i}`);
+                if (c) c.className = `cloud-station ${i === currentStation ? 'active' : ''}`;
+            }
+
+            moveJet(currentStation);
+            const st = stations[currentStation];
+            document.getElementById('methodTitle').innerText = st.title;
+            document.getElementById('answerInput').value = '';
+            document.getElementById('feedback').innerText = '';
+            renderVisual(st);
+        }
+
+        function renderVisual(st) {
+            const display = document.getElementById('visualDisplay');
+            if (!display) return;
+            display.innerHTML = '';
+            document.getElementById('equationText').innerText = `${toArabic(st.f1)} × ${toArabic(st.f2)} = `;
+
+            if (st.type === 'models') {
+                document.getElementById('methodDesc').innerText = 'اكتب ناتج مسألة النماذج:';
+                const div = document.createElement('div');
+                for (let i = 0; i < st.f1; i++) {
+                    const group = document.createElement('div');
+                    group.className = 'dot-group';
+                    for (let j = 0; j < st.f2; j++) {
+                        const dot = document.createElement('div');
+                        dot.className = 'dot';
+                        group.appendChild(dot);
+                    }
+                    div.appendChild(group);
+                }
+                display.appendChild(div);
+
+            } else if (st.type === 'repeated') {
+                document.getElementById('methodDesc').innerText = 'حَوِّل الجمع المتكرر إلى ناتج ضرب:';
+                let arr = Array(st.f1).fill(toArabic(st.f2));
+                const div = document.createElement('div');
+                div.style.cssText = 'font-size:1.3rem; color:#38bdf8; font-weight:bold;';
+                div.innerText = arr.join(' + ');
+                display.appendChild(div);
+
+            } else if (st.type === 'grid') {
+                document.getElementById('methodDesc').innerText = `شبكة من ${toArabic(st.f1)} صفوف و ${toArabic(st.f2)} أعمدة:`;
+                const grid = document.createElement('div');
+                grid.className = 'grid-visual';
+                grid.style.gridTemplateColumns = `repeat(${st.f2}, 1fr)`;
+                for (let i = 0; i < st.f1 * st.f2; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    grid.appendChild(cell);
+                }
+                display.appendChild(grid);
+
+            } else if (st.type === 'skip') {
+                document.getElementById('methodDesc').innerText = `ساعد الكنغر بالقفز (${toArabic(st.f1)}) لـ (${toArabic(st.f2)}) قفزات:`;
+                const totalMax = Math.max(st.f1 * st.f2 + st.f1, 10);
+                const container = document.createElement('div');
+                container.className = 'number-line-container';
+                const axis = document.createElement('div');
+                axis.className = 'number-line-axis';
+                const targetVal = st.f1 * st.f2;
+
+                // SVG Container for Curved Arrows
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('class', 'arcs-svg');
+                svg.setAttribute('viewBox', '0 0 100 40');
+                svg.setAttribute('preserveAspectRatio', 'none');
+
+                // Define Arrow Marker
+                const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+                const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+                marker.setAttribute('id', 'arrowhead');
+                marker.setAttribute('viewBox', '0 0 10 10');
+                marker.setAttribute('refX', '5');
+                marker.setAttribute('refY', '5');
+                marker.setAttribute('markerWidth', '6');
+                marker.setAttribute('markerHeight', '6');
+                marker.setAttribute('orient', 'auto-start-reverse');
+
+                const pathArrow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                pathArrow.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z');
+                pathArrow.setAttribute('fill', '#f59e0b');
+                marker.appendChild(pathArrow);
+                defs.appendChild(marker);
+                svg.appendChild(defs);
+
+                for (let v = 0; v <= totalMax; v++) {
+                    const tick = document.createElement('div');
+                    tick.className = 'line-tick';
+                    const mark = document.createElement('div');
+                    mark.className = 'tick-mark';
+                    if (v % st.f1 === 0 && v <= targetVal) mark.style.background = '#34d399';
+                    const label = document.createElement('div');
+                    label.className = 'tick-val';
+                    label.innerText = toArabic(v);
+                    tick.appendChild(mark);
+                    tick.appendChild(label);
+                    axis.appendChild(tick);
+                }
+
+                // Draw Curved Arrows from Right to Left (RTL)
+                for (let jump = 0; jump < st.f2; jump++) {
+                    const startVal = jump * st.f1;
+                    const endVal = (jump + 1) * st.f1;
+                    
+                    // RTL Positioning: Start from startVal (Right) to endVal (Left)
+                    const xStart = 100 - (startVal / totalMax) * 100;
+                    const xEnd = 100 - (endVal / totalMax) * 100;
+                    const xMid = (xStart + xEnd) / 2;
+
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    const d = `M ${xStart} 36 Q ${xMid} 4 ${xEnd} 34`;
+                    path.setAttribute('d', d);
+                    path.setAttribute('fill', 'none');
+                    path.setAttribute('stroke', '#f59e0b');
+                    path.setAttribute('stroke-width', '2');
+                    path.setAttribute('marker-end', 'url(#arrowhead)');
+                    svg.appendChild(path);
+                }
+
+                axis.appendChild(svg);
+
+                const kangaroo = document.createElement('div');
+                kangaroo.className = 'kangaroo-character';
+                kangaroo.innerText = '🦘';
+                kangaroo.style.right = `${(targetVal / totalMax) * 100}%`;
+                axis.appendChild(kangaroo);
+                container.appendChild(axis);
+                display.appendChild(container);
+            }
+        }
+
+        function checkAnswer() {
+            const input = document.getElementById('answerInput');
+            const feedback = document.getElementById('feedback');
+            if (!input || !feedback) return;
+
+            const userVal = toEnglish(input.value.trim());
+            if (userVal === '') return;
+
+            const st = stations[currentStation];
+            if (parseInt(userVal) === st.f1 * st.f2) {
+                score += 10;
+                document.getElementById('scoreText').innerText = `النقاط: ${toArabic(score)}`;
+                feedback.style.color = '#10b981';
+                feedback.innerText = '⚡ إجابة ممتازة واختراق لحاجز الصوت!';
+                setTimeout(() => {
+                    currentStation++;
+                    loadStation();
+                }, 500);
+            } else {
+                feedback.style.color = '#ef4444';
+                feedback.innerText = '⚠️ خطأ! حاول مرة أخرى!';
+            }
+        }
+
+        function openNameModal() { document.getElementById('nameModal').classList.remove('hidden'); }
+        function updateGenderRole(role) { selectedGender = role; }
+
+        function saveName() {
+            const inp = document.getElementById('nameInput');
+            if (inp && inp.value.trim() !== '') studentName = inp.value.trim();
+            document.getElementById('studentNameText').innerText = studentName;
+            document.getElementById('certStudentName').innerText = studentName;
+            document.getElementById('nameModal').classList.add('hidden');
+            selectTable(currentTable);
+        }
+
+        function initTableBar() {
+            const bar = document.getElementById('tableSelectorBar');
+            if (!bar) return;
+            bar.innerHTML = '';
+            for (let i = 1; i <= 10; i++) {
+                const btn = document.createElement('button');
+                btn.className = `table-btn ${i === currentTable ? 'active' : ''}`;
+                btn.id = `tableBtn_${i}`;
+                btn.innerText = `جدول ${toArabic(i)}`;
+                btn.onclick = function() { selectTable(i); };
+                bar.appendChild(btn);
+            }
+        }
+
+        function selectTable(tableNum) {
+            currentTable = tableNum;
+            currentStation = 0;
+            score = 0;
+            document.getElementById('scoreText').innerText = `النقاط: ٠`;
+            document.getElementById('victoryCard').classList.add('hidden');
+            document.getElementById('questionCard').classList.remove('hidden');
+
+            for (let i = 1; i <= 10; i++) {
+                const btn = document.getElementById(`tableBtn_${i}`);
+                if (btn) btn.className = `table-btn ${i === tableNum ? 'active' : ''}`;
+            }
+            setupStations();
+            loadStation();
+        }
+
+        function openCertModal() { document.getElementById('certModal').classList.remove('hidden'); }
+        function closeCertModal() { document.getElementById('certModal').classList.add('hidden'); }
+
+        window.onload = function() {
+            initTableBar();
+            document.getElementById('nameModal').classList.remove('hidden');
+        };
+    </script>
+</body>
+</html>
